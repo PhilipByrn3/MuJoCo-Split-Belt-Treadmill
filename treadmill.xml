@@ -1,0 +1,51 @@
+<mujoco>
+    <compiler autolimits="true"/>
+    <option gravity = "0 0 -9.81" />
+    <asset>
+        <texture name="grid" type="2d" builtin="checker" rgb1="1 1 1" rgb2=".5 .5 .5" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+        <material name="grid" texture="grid" texrepeat="4 4" texuniform="true"/>
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 20" dir="0 0 -1"/>
+        <geom name="floor" pos="0 0 -0.01" type="plane" size="5 10 .01" material="grid"/>
+
+        <geom pos="5 10 0" type="cylinder" size="1 4" rgba=".2 .5 .5 1"/>
+        <geom pos="-5 10 0" type="cylinder" size="1 4" rgba=".2 .5 .5 1"/>
+        <geom pos="5 -10 0" type="cylinder" size="1 4" rgba=".2 .5 .5 1"/>
+        <geom pos="-5 -10 0" type="cylinder" size="1 4" rgba=".2 .5 .5 1"/>
+
+        <geom type="box" pos="5 0 0" size="0.5 10 1" rgba=".2 .5 .5 1"/>
+        <geom type="box" pos="-5 0 0" size="0.5 10 1" rgba=".2 .5 .5 1"/>
+        <geom type="box" pos="0 10 1.5" size="5 0.5 0.5" rgba=".2 .5 .5 1"/>
+        <geom type="box" pos="0 -10 1.5" size="5 0.5 0.5" rgba=".2 .5 .5 1"/>
+
+        <body pos="1 0 0.5">
+            <geom name="redbelt" type="box" size="1 20 0.3" rgba="1 0 0 1"  material="grid" mass="1"/>
+            <joint name="redconveyor" type="slide" pos="0 -10 0" axis="0 1 0"/>
+            <site name="redbeltsite" type="sphere" size="0.05" pos="0 0 0"/>
+        </body>
+        <body pos="-1 0 0.5">
+            <geom name="bluebelt" type="box" size="1 20 0.3" rgba="0 0 1 1" material="grid" mass="1"/>
+            <joint name="blueconveyor" type="slide" pos="0 -10 0" axis="0 1 0" />
+            <site name="bluebeltsite" type="sphere" size="0.05" pos="0 0 0"/>
+        </body>
+        <!--body pos="0 0 5">
+        	<geom name="testbox" type="box" mass="1" size="1 1 1" rgba="0 1 0 1"/>
+        	<joint type="free" pos="0 0 0"/>
+            <site name="sitebox" pos="0 0 -1" type="sphere" size="0.05"/>
+        </body-->
+    </worldbody>
+
+    <actuator>
+        <general name="redbeltact" joint="redconveyor" biastype="affine" gainprm="1" biasprm="0"/>
+        <general name="bluebeltact" joint="blueconveyor" biastype="affine" gainprm="1" biasprm="0"/>
+    </actuator>
+
+    <sensor>
+        <velocimeter site="redbeltsite"/>
+        <velocimeter site="bluebeltsite"/>
+        <!--velocimeter site="sitebox"/-->
+    </sensor>
+
+</mujoco>
