@@ -4,10 +4,15 @@ import mujoco as mj
 from mujoco.glfw import glfw
 import numpy as np
 import os
+import gymnasium as gym
+import pandas as pd
+from sbtdata import findTime, AverageSteadyVelocity, ConstructData
 
 print_camera_config = 0   # set to 1 to print camera configuration
-xml_path = 'treadmill.xml' #xml file (assumes this is in the same folder as this file)
-simend = 100 			#simulation time
+#xml_path = 'anttreadmill.xml' #xml file (assumes this is in the same folder as this file)
+#xml_path = 'treadmill.xml'
+xml_path = 'rimlesstreadmill.xml'
+simend = 10		#simulation time
 
 # For callback functions
 button_left = False
@@ -94,6 +99,8 @@ def scroll(window, xoffset, yoffset):
     mj.mjv_moveCamera(model, action, 0.0, -0.05 *
                       yoffset, scene, cam)
 
+
+
 #get the full path
 dirname = os.path.dirname(__file__)
 abspath = os.path.join(dirname + "/" + xml_path)
@@ -124,9 +131,9 @@ glfw.set_mouse_button_callback(window, mouse_button)
 glfw.set_scroll_callback(window, scroll)
 
 #camera configuration
-cam.azimuth = 180
-cam.elevation = -40
-cam.distance = 20
+cam.azimuth = 0
+cam.elevation = -10
+cam.distance = 15
 # cam.lookat = np.array([0.0, 0.0, 0])
 
 #initialize the controller
@@ -136,15 +143,27 @@ init_controller(model,data)
 mj.set_mjcb_control(controller)
 
 
+#data collection
+timedata = []
+RL1Data = []
+
+fprdat_raw = []
+fpbdat_raw = []
+
+belt_diff = 1.41
+
 while not glfw.window_should_close(window):
     time_prev = data.time
 
     while (data.time - time_prev < 1.0/60.0):
         mj.mj_step(model, data)
-        data.qvel[0] = 2	# velocity of red belt
-        data.qvel[1] = 4	# velocity of blue belt
-        #print(data.sensordata) # prints all sensor data
-        if (data.qpos[1] > 10):
+        timedata.append(data.time)
+        fprdat_raw.append(abs(data.sensordata[2].copy()))
+        fpbdat_raw.append(abs(data.sensordata[5].copy()))
+
+        data.qvel[0] = 0.5	# velocity of red belt
+        data.qvel[1] = data.qvel[0] + belt_diff 	# velocity of blue belt
+        if (data.qpos[1] > 10) | (data.qpos[0] > 10) :
         	data.qpos[0] = -5 # resets belt position without affecting velocity of object on the treadmill
         	data.qpos[1] = -5
         	
@@ -173,3 +192,17 @@ while not glfw.window_should_close(window):
     glfw.poll_events()
 
 glfw.terminate()
+
+datList = ConstructData(timedata, fprdat_raw, fpbdat_raw)
+fprdat, fprdat_shift, fpbdat, fpbdat_shift = datList
+
+time_slow = findTime(fprdat, fprdat_shift)
+time_fast = findTime(fpbdat, fpbdat_shift)
+
+alpha = np.deg2rad(4.5)
+beta = np.deg2rad(15.5)
+length = 2
+
+
+AverageSteadyVelocity(time_slow, time_fast, alpha, beta, length, belt_diff)
+
