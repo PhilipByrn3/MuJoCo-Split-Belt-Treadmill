@@ -57,19 +57,19 @@ def findTime(fpdat, fpdat_shift):
         if fpdat_shift[idx] == 1:
 
             if fpdat[idx] == 0 and fpdat_shift[idx+1] == 1 and lookback == 0 and lookahead!=0:
-                #print(fpdat_shift[idx], idx,  lookback, lookahead,"START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", time_df[idx])
+                print(fpdat_shift[idx], idx,  lookback, lookahead,"START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", time_df[idx])
                 stimelist.append(time_df[idx])
                 
 
             elif lookahead-1==0 and lookback!=0:
-                #print(fpdat_shift[idx], idx,  lookback, lookahead,"END ==========================", time_df[idx])
+                print(fpdat_shift[idx], idx,  lookback, lookahead,"END ==========================", time_df[idx])
                 etimelist.append(time_df[idx])
             else:
-                #print(fpdat_shift[idx], idx, lookback, lookahead-1,"######")
+                print(fpdat_shift[idx], idx, lookback, lookahead-1,"######")
                 pass
 
         else:   
-            #print(fpdat_shift[idx], idx, lookback, lookahead-1,"*")
+            print(fpdat_shift[idx], idx, lookback, lookahead-1,"*")
             pass
             
 
