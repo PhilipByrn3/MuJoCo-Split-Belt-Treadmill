@@ -19,7 +19,7 @@
     </asset>
 
     <worldbody>
-        
+
         <light pos="0 0 40" dir="0 0 -1"/>
 
         <body pos="1.01 0 0.5" axisangle="1 0 0 0">
@@ -40,11 +40,12 @@
             <camera name="axlecam" pos="0 0 0" axisangle="0 0 1 -90"/>
         </body>
 
-        <body pos="0 0 2.83">
-            <geom name="axlebase" type="cylinder" size="0.15 .5" axisangle="0 1 0 90"/>
+        <body pos="0 0 2.93">
+
+            <geom name="axlebase" type="cylinder" size="0.15 .5" axisangle="0 1 0 90" density="10"/>
             <joint type="slide" axis="0 0 1"/>
+            <joint type="slide" axis="0 1 0"/>
             <joint type="hinge" axis="1 0 0"/>
-            <!--joint type="hinge" axis="1 0 0"/-->
             <site name="axlesite" type="sphere" size="0.01" pos="0 0 0"/>
 
             <body pos="0.5 0 0" axisangle="1 0 0 0">
@@ -136,10 +137,9 @@
     </actuator>
 
     <sensor>
-
         <force site="forceSiteR"/>
         <force site="forceSiteB"/>
-
+        <velocimeter name="axle_velocimeter" site="axlesite"/>
     </sensor>
 
 </mujoco>
