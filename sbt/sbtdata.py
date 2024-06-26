@@ -24,19 +24,19 @@ def ConstructData(timedata, fprdat, fpbdat, measured_velocity):
 
     measured_velocity = df['measured_velocity']
 
-    df.to_csv('sbt_data.csv', encoding="utf-8")
+    return [df, fprdat, fprdat_shift, fpbdat, fpbdat_shift, measured_velocity]
 
-    return [fprdat, fprdat_shift, fpbdat, fpbdat_shift, measured_velocity]
 
-def findTime(fpdat, fpdat_shift, print_data):
 
-    df = pd.read_csv('sbt_data.csv')
+def findTime(df, fpdat, fpdat_shift, print_data):
+
     time_df = df['Time']
-
     idx = 1
     j = 0
     lookback = 0
     lookahead = 0
+    total_difference = 0
+    tavg = 0
 
     fpdat_shift = fpdat_shift.copy()
     fpdat = fpdat.copy()
@@ -57,17 +57,22 @@ def findTime(fpdat, fpdat_shift, print_data):
             j += 1
 
         if fpdat_shift[idx] == 1:
+
             if fpdat[idx] == 0 and lookback == 0 and lookahead != 0:
                 start_times.append(time_df[idx])
 
             elif lookahead - 1 == 0 and lookback != 0:
+
                 if start_times:
                     start_time = start_times.pop()
                     pairs.append((start_time, time_df[idx]))
+
                 else:
                     pass
+
             else:
                 pass
+
         else:
             pass
 
@@ -89,7 +94,7 @@ def findTime(fpdat, fpdat_shift, print_data):
                     if start_times:
                         print(fpdat_shift[idx], idx, lookback, lookahead, "END ==========================", time_df[idx])
                     else:
-                        print(fpdat_shift[idx], idx, lookback, lookahead, "UNMATCHED END ==========================", time_df[idx])                 
+                        print(fpdat_shift[idx], idx, lookback, lookahead, ">>> END ==========================", time_df[idx])                 
                 else:
                     print(fpdat_shift[idx], idx, lookback, lookahead - 1, "######")
             else:
@@ -98,12 +103,7 @@ def findTime(fpdat, fpdat_shift, print_data):
             j = 0
             lookback = 0
             lookahead = 0
-
-    # Handling any unmatched start times at the end of the loop
-    for unmatched_start in start_times:
-        # print("UNMATCHED START >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", unmatched_start)
-        pass
-
+    
     total_difference = sum(end - start for start, end in pairs)
     tavg = total_difference/len(pairs)
     return tavg
@@ -120,15 +120,22 @@ def AverageSteadyVelocity(slow_time, fast_time, alpha, beta, length, belt_diff, 
 
     timesum = slow_time+fast_time
     sbWalkSpeed = ((2*length*sinsum)-(fast_time*belt_diff))/timesum
-    print(
-        "========================================\n Slow Belt Time: ", slow_time, "\n",
-        "Fast Belt Time: ", fast_time, "\n",
-        "Time Sum:", timesum, "\n",
-        "Belt Difference: ", belt_diff, "\n",
-        "Slow Belt Distance Travelled:", sTravel, "\n",
-        "Fast Belt Distance Travelled:", fTravel, "\n",
-        "Total Belt Distance Travelled:", sTravel+fTravel, "\n",
-        "Measured Average Steady Velocity: ", measured_velocity_avg, "\n",
-        "Average Steady Velocity: ", sbWalkSpeed, "\n========================================",
-        )
 
+    # print(
+    #     "========================================\n Slow Belt Time: ", slow_time, "\n",
+    #     "Fast Belt Time: ", fast_time, "\n",
+    #     "Time Sum:", timesum, "\n",
+    #     "Belt Difference: ", belt_diff, "\n",
+    #     "Slow Belt Distance Travelled:", sTravel, "\n",
+    #     "Fast Belt Distance Travelled:", fTravel, "\n",
+    #     "Total Belt Distance Travelled:", sTravel+fTravel, "\n",
+    #     "Measured Average Steady Velocity: ", measured_velocity_avg, "\n",
+    #     "Average Steady Velocity: ", sbWalkSpeed, "\n========================================",
+    #     )
+
+    print("=========================================\n Belt Difference: ", belt_diff, "\n",
+          "Measured Average Steady Velocity: ", measured_velocity_avg, "\n",
+          "Average Steady Velocity: ", sbWalkSpeed, "\n=========================================",
+          )
+
+    return measured_velocity_avg, sbWalkSpeed
