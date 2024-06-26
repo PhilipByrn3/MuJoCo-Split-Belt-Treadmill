@@ -1,0 +1,52 @@
+<mujoco model="split_belt_treadmill">
+
+
+    <include file="./common/skybox.xml"/>
+    <include file="./common/visual.xml"/>
+    <include file="./common/materials.xml"/>
+
+    
+    <compiler autolimits="true"/>
+
+
+    <option gravity = "0 0 -9.81" timestep="0.01" />
+
+
+    <default>
+        <joint armature="1" damping="0" limited="false"/>
+    </default>
+
+
+    <worldbody>
+        <light pos="0 0 40" dir="0 0 -1"/>
+        <body pos="1.01 0 0.5" axisangle="1 0 0 0">
+            <geom name="redbelt" type="box" size="1 20 0.3" rgba="1 0 0 1"  material="grid" mass="10"/>
+            <joint name="redconveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
+            <site name="redbeltsite" type="sphere" size="0.05" pos="0 0 0"/>
+            <site name="forceSiteR" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 1 1 0"/>
+        </body>
+        <body pos="-1.01 0 0.5" axisangle="1 0 0 0">
+            <geom name="bluebelt" type="box" size="1 20 0.3" rgba="0 0 1 1" material="grid" mass="10"/>
+            <joint name="blueconveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
+            <site name="bluebeltsite" type="sphere" size="0.05" pos="0 0 0"/>
+            <site name="forceSiteB" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 1 1 0.1"/>
+        </body>
+        <body pos="-15 0 3" axisangle="0 1 0 -90">
+            <camera name="axlecam" pos="0 0 0" axisangle="0 0 1 -90"/>
+        </body>       
+    </worldbody>
+
+
+    <actuator>  
+        <general name="redbeltact" joint="redconveyor" biastype="affine" gainprm="1" biasprm="0"/>
+        <general name="bluebeltact" joint="blueconveyor" biastype="affine" gainprm="1" biasprm="0"/> 
+    </actuator>
+
+
+    <sensor>
+        <force site="forceSiteR"/>
+        <force site="forceSiteB"/>
+    </sensor>
+
+
+</mujoco>

@@ -1,0 +1,149 @@
+<mujoco model="wheel">
+
+
+    <include file="./common/skybox.xml"/>
+    <include file="./common/visual.xml"/>
+    <include file="./common/materials.xml"/>
+
+    
+    <compiler autolimits="true" settotalmass="5"/>
+
+
+    <worldbody>
+        <light pos="0 0 40" dir="0 0 -1"/>
+
+        <body name="axle" pos="0 0 3">
+            <geom type="box" size="0.76 0.15 0.15"/>
+            <joint name="axleZAxis" type="slide" axis="0 0 1"/>
+            <joint name="axleYAxis" type="slide" axis="0 1 0"/>
+            <joint type="hinge" axis="1 0 0"/>
+            <site name="axlesite" type="sphere" size="0.01" pos="0 0 0"/>
+
+            <body axisangle="1 0 0 0">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 40">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 80">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 120">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 160">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 200">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 240">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 280">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 320">
+                <geom type="capsule" fromto="0.76 0 0  0.76 0 2.54" size="0.1"/>
+            </body>
+
+            <body axisangle="1 0 0 20">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 60">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 100">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 140">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 180">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 220">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 260">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 300">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 340">
+                <geom type="box" pos="0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+
+            <body axisangle="1 0 0 9">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 49">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 89">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 129">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 169">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 209">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 249">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 289">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+            <body axisangle="1 0 0 329">
+                <geom type="capsule" fromto="-0.76 0 0  -0.76 0 2.54" size="0.1"/>
+            </body>
+
+            <body axisangle="1 0 0 29">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 69">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 109">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 149">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 189">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 229">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 269">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 309">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+            <body axisangle="1 0 0 349">
+                <geom type="box" pos="-0.76 0 1.27" size="0.05 0.85 1"/>
+            </body>
+
+        </body>
+        
+    </worldbody>
+
+
+    <actuator>  
+
+    </actuator>
+
+
+    <sensor>
+
+    </sensor>
+
+
+</mujoco>
