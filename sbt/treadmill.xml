@@ -5,7 +5,7 @@
 
     <default>
 
-        <geom density="5.0" rgba="0.8 0 0.6 1" size="0.05" friction="1 0 0"/>
+        <geom density="5.0" rgba="0.8 0 0.6 1" size="0.05" friction="3 0 0"/>
         <joint armature="1" damping="0" limited="false"/>
 
     </default>
@@ -26,25 +26,25 @@
             <geom name="redbelt" type="box" size="1 20 0.3" rgba="1 0 0 1"  material="grid" mass="10"/>
             <joint name="redconveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
             <site name="redbeltsite" type="sphere" size="0.05" pos="0 0 0"/>
-            <site name="forceSiteR" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="0 1 0 0.2"/>
+            <site name="forceSiteR" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 1 1 0.1"/>
         </body>
 
         <body pos="-1.01 0 0.5" axisangle="1 0 0 0">
             <geom name="bluebelt" type="box" size="1 20 0.3" rgba="0 0 1 1" material="grid" mass="10"/>
             <joint name="blueconveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
             <site name="bluebeltsite" type="sphere" size="0.05" pos="0 0 0"/>
-            <site name="forceSiteB" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="0 1 0 0.2"/>
+            <site name="forceSiteB" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 1 1 0.1"/>
         </body>
 
-        <body pos="-10 0 3" axisangle="0 1 0 -90">
+        <body pos="-15 0 3" axisangle="0 1 0 -90">
             <camera name="axlecam" pos="0 0 0" axisangle="0 0 1 -90"/>
         </body>
 
-        <body pos="0 0 2.93">
+        <body pos="0 0 2.83">
 
             <geom name="axlebase" type="cylinder" size="0.15 .5" axisangle="0 1 0 90" density="10"/>
-            <joint type="slide" axis="0 0 1"/>
-            <joint type="slide" axis="0 1 0"/>
+            <joint name="axleZAxis" type="slide" axis="0 0 1"/>
+            <joint name="axleYAxis" type="slide" axis="0 1 0"/>
             <joint type="hinge" axis="1 0 0"/>
             <site name="axlesite" type="sphere" size="0.01" pos="0 0 0"/>
 
