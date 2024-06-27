@@ -23,7 +23,6 @@ def ConstructData(timedata, fprdat, fpbdat, measured_velocity):
     fpbdat_shift = df['fpbdat_shift']
 
     measured_velocity = df['measured_velocity']
-
     return [df, fprdat, fprdat_shift, fpbdat, fpbdat_shift, measured_velocity]
 
 
@@ -40,11 +39,11 @@ def findTime(df, fpdat, fpdat_shift, print_data):
 
     fpdat_shift = fpdat_shift.copy()
     fpdat = fpdat.copy()
-
-    fpdat_shift[fpdat_shift == 98.10000000000001] = 0
+    #98.10000000000001 if mass is 10
+    fpdat_shift[fpdat_shift == 490.5] = 0
     fpdat_shift[fpdat_shift != 0] = 1
 
-    fpdat[fpdat==98.10000000000001] = 0
+    fpdat[fpdat== 490.5] = 0
     fpdat[fpdat!=0] = 1
     start_times = []  # Stack to keep track of start times
     pairs = []  # List to store the pairs of start and end times
@@ -103,7 +102,7 @@ def findTime(df, fpdat, fpdat_shift, print_data):
             j = 0
             lookback = 0
             lookahead = 0
-    
+        print(pairs)
     total_difference = sum(end - start for start, end in pairs)
     tavg = total_difference/len(pairs)
     return tavg
