@@ -6,6 +6,7 @@ from dm_control.mujoco import Physics
 from dm_control import mujoco
 from dm_control.utils import xml_tools
 from dm_control import mjcf
+from dm_control.mjcf.base import Element
 
 
 import os
@@ -15,6 +16,7 @@ import pandas as pd
 import numpy as np
 from moviepy.editor import ImageSequenceClip
 from PIL import Image
+import glfw
 
 import common
 from sbtdata import ConstructData, findTime, AverageSteadyVelocity
@@ -34,15 +36,36 @@ class SbTreadmillTask(Task):
     def initialize_episode(self, physics):
         physics.named.data.qvel['redconveyor'] = 1
         physics.named.data.qvel['blueconveyor'] = 1.5
-        physics.named.data.qvel['axleYAxis'] = 0  # Talk about this
+        physics.named.data.qvel['axleYAxis'] = -1  # Talk about this
+
 
 def merge_models():
 
-    world = mjcf.RootElement()
-    world.worldbody.add('geom', name='ground',  type='plane', size=[10, 10, 1])
+    world_xml_string = common.read_model('split_belt_treadmill.xml')
+    model_xml_string = common.read_model('wheel.xml')
 
-    wheel = mjcf.from_xml_file('wheel.xml')
-    world.attach(wheel)
+    parser = etree.XMLParser(remove_blank_text=True)
+
+    world_mjcf = etree.XML(world_xml_string, parser)
+    model_mjcf = etree.XML(model_xml_string, parser)
+
+    world_worldbody = world_mjcf.find('worldbody')
+    model_worldbody = model_mjcf.find('worldbody')
+
+    world_sensor = world_mjcf.find('sensor')
+    model_sensor = model_mjcf.find('sensor')
+
+    for body in model_worldbody:
+        world_worldbody.append(body)
+    
+    for sensor in model_sensor:
+        world_sensor.append(sensor)
+
+    # concat = etree.tostring(world_mjcf, pretty_print=True).decode()
+    # print(concat)
+    return etree.tostring(world_mjcf, pretty_print=True).decode()
+
+
 
 def render_video(frames):
     clip = ImageSequenceClip(frames, fps=100)
@@ -55,7 +78,7 @@ def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data
     frames = []
     fprdat_raw, fpbdat_raw, measured_velocity_data, timedata = [], [], [], []
 
-    while i < 1700:
+    while i < 2000:
 
         sb_physics.step()
         sb_physics.named.data.qvel['redconveyor'] = 1 # Constant value red (slow) belt
@@ -71,7 +94,8 @@ def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data
         timedata.append(sb_physics.data.time)
         
         if render_video_enable is True:
-            img = sb_physics.render(width=640, height=480,camera_id=0)
+            # MUJOCO_GL=egl python test.py # <-----------USE ME TO RUN 
+            img = sb_physics.render(width=640, height=480, camera_id=0)
             frames.append(img)
 
         i+=1
@@ -98,7 +122,7 @@ def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data
 
 def loop_simulate_treadmill(belt_diff, i):
 
-    while belt_diff < 1.8:
+    while belt_diff < 4.1:
 
         measured_velocity_avg, simulated_velocity_avg = simulate_treadmill(belt_diff, i, sb_physics, render_video_enable=False, print_data=False)
 
@@ -124,12 +148,13 @@ def loop_simulate_treadmill(belt_diff, i):
 
         
 if __name__ == '__main__':
+    sb_physics = mujoco.Physics.from_xml_string(merge_models())
 
-    merge_models()
-
-    sb_physics = mujoco.Physics.from_xml_path("rimlesstreadmill.xml")
+    # sb_physics = mujoco.Physics.from_xml_path('rimlesstreadmill.xml')
     sb_task = SbTreadmillTask()
-    sb_env = Environment(physics=sb_physics, task=sb_task)
+    sb_env = Environment(physics=sb_physics, 
+                         task=sb_task)
+    
     sb_task.initialize_episode(sb_physics)
 
     MVAlist, SVAlist, BDlist = [], [], []
@@ -137,12 +162,13 @@ if __name__ == '__main__':
     render_video_enable = True
     print_data = False
 
+    #1.3
     belt_diff = 0.5
     i = 0
 
-    simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data) # Simulates one instance of the treadmill Env
+    #simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data) # Simulates one instance of the treadmill Env
 
-    # loop_simulate_treadmill(belt_diff, i) # Simulates belt_diff/interval instances of treadmill Env
+    loop_simulate_treadmill(belt_diff, i) # Simulates belt_diff/interval instances of treadmill Env
 
     
     
