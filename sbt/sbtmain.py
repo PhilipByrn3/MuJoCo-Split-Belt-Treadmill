@@ -156,7 +156,7 @@ def loop_simulate_treadmill(belt_diff, i):
     
     gdf = pd.DataFrame(graphpd)
 
-    gdf.to_csv('Velocities_and BeltDiffs.csv')
+    gdf.to_csv('Velocities_and_BeltDiffs.csv')
 
 
         
