@@ -4,8 +4,7 @@ This is a simulation of a split-belt treadmill made in the MuJoCo physics engine
 This is model is validated by comparing the results of experimental data from the Butterfield study to the gathered data in the MuJoCo simulation (with offset). 
 
 Butterfield:
-![image](https://github.com/PhilipByrn3/MuJoCo-Split-Belt-Treadmill/assets/172526780/a0e6c3c4-7e0d-4a0f-826b-3fa21a26acf0)
-
+![butterfield_experimental_graph](https://github.com/PhilipByrn3/MuJoCo-Split-Belt-Treadmill/assets/172526780/cf2938b1-0413-4289-8720-ceabf8bbe393)
 
 MuJoCo Simulation:
 ![Screenshot from 2024-06-28 15-30-43](https://github.com/PhilipByrn3/MuJoCo-Split-Belt-Treadmill/assets/172526780/af2fc5d8-3838-45fe-8f6c-32fa00391635)
