@@ -18,6 +18,7 @@ from PIL import Image
 
 import common
 from sbtdata import ConstructData, findTime, AverageSteadyVelocity
+from sbtgraph import convert_dataframe, generate_graph
 
 
 class SbTreadmillTask(Task):
@@ -79,31 +80,28 @@ def render_video(frames):
 
 def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data):
     
-    frames = []
-    fprdat_raw, fpbdat_raw, measured_velocity_data, timedata = [], [], [], []
+    slow_belt_force_raw, fast_belt_force_raw, measured_velocity_data, time_data, frames = [], [], [], [], []
 
-    while i < 2000:
+    while i < 10000:
 
         sb_physics.step()
 
-        # Belt velocities are set at the beginning of each step
-        sb_physics.named.data.qvel['redconveyor'] = 1 # Constant value red (slow) belt
-        sb_physics.named.data.qvel['blueconveyor'] = sb_physics.named.data.qvel['redconveyor'] + belt_diff # Blue (fast) belt velocity = Red belt velocity + belt_diff
+        # Belt velocities and positions are set at the beginning of each step
+        sb_physics.named.data.qvel['slow_belt_conveyor'] = 1 # Constant value red (slow) belt
+        sb_physics.named.data.qvel['fast_belt_conveyor'] = sb_physics.named.data.qvel['slow_belt_conveyor'] + belt_diff # Blue (fast) belt velocity = Red belt velocity + belt_diff
 
-        # Belt positions are reset if either of the belts exceed a distance of 10, effectively creating an 'infinite' treadmill
-        if (sb_physics.data.qpos[0] > 10) or (sb_physics.data.qpos[1] > 10):
-            sb_physics.data.qpos[0] = 0 # Red belt
-            sb_physics.data.qpos[1] = 0 # Blue Belt
+        sb_physics.named.data.qpos['fast_belt_conveyor'] = 0 # Slow belt position set to 0
+        sb_physics.named.data.qpos['slow_belt_conveyor'] = 0 # Fast belt position set to 0
     
         # Gather data from sensors and append into list
-        fprdat_raw.append(sb_physics.named.data.sensordata[2].copy())
-        fpbdat_raw.append(sb_physics.named.data.sensordata[5].copy())
+        slow_belt_force_raw.append(sb_physics.named.data.sensordata[2].copy())
+        fast_belt_force_raw.append(sb_physics.named.data.sensordata[5].copy())
         measured_velocity_data.append(abs(sb_physics.named.data.sensordata['axle_velocimeter'][2].copy()))
-        timedata.append(sb_physics.data.time)
+        time_data.append(sb_physics.data.time)
         
         if render_video_enable is True:
 
-            # MUJOCO_GL=egl python test.py <-----------USE ME TO RUN IN TERMINAL IF RENDERING VIDEO
+            # MUJOCO_GL=egl python test.py <-----------USE ME TO RUN IN TERMINAL IF RENDERING VIDEO in VM
             img = sb_physics.render(width=640, height=480, camera_id=0)
             frames.append(img)
 
@@ -114,12 +112,12 @@ def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data
         render_video(frames)
 
     # Create Dataframe for collected data
-    datList = ConstructData(timedata, fprdat_raw, fpbdat_raw, measured_velocity_data)
-    df, fprdat, fprdat_shift, fpbdat, fpbdat_shift, measured_velocity = datList
+    datList = ConstructData(time_data, slow_belt_force_raw, fast_belt_force_raw, measured_velocity_data)
+    df, slow_belt_force, slow_belt_force_shift, fast_belt_force, fast_belt_force_shift, measured_velocity = datList
     
     # Calculate the average time of contact for spokes of wheel hitting the sensors on the belts
-    time_slow = findTime(df, fprdat, fprdat_shift, print_data)
-    time_fast = findTime(df, fpbdat, fpbdat_shift, print_data)
+    time_slow = findTime(df, slow_belt_force, slow_belt_force_shift, print_data)
+    time_fast = findTime(df, fast_belt_force, fast_belt_force_shift, print_data)
 
     # Angle offset between spokes of opposite sides and length of spokes
     alpha = np.deg2rad(4.5)
@@ -139,7 +137,7 @@ def loop_simulate_treadmill(belt_diff, i):
 
         measured_velocity_avg, simulated_velocity_avg = simulate_treadmill(belt_diff, i, sb_physics, render_video_enable=False, print_data=False)
 
-        MVAlist.append(measured_velocity_avg)
+        #MVAlist.append(measured_velocity_avg)
         SVAlist.append(simulated_velocity_avg)
         BDlist.append(belt_diff)
 
@@ -150,13 +148,17 @@ def loop_simulate_treadmill(belt_diff, i):
 
     'BD': BDlist,
     'SVA': SVAlist,
-    'MVA': MVAlist,
+    #'MVA': MVAlist,
 
     }
     
     gdf = pd.DataFrame(graphpd)
+    return gdf
 
-    gdf.to_csv('Velocities_and_BeltDiffs.csv')
+
+def create_graph(dataframe):
+    belt_diff_axis, steady_velocity_avg = convert_dataframe(dataframe)
+    generate_graph(belt_diff_axis, steady_velocity_avg)
 
 
         
@@ -173,7 +175,7 @@ if __name__ == '__main__':
 
     MVAlist, SVAlist, BDlist = [], [], []
 
-    render_video_enable = True
+    render_video_enable = False
     print_data = False
 
     belt_diff = 0.55
@@ -181,7 +183,10 @@ if __name__ == '__main__':
 
     #simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data) # Simulates one instance of the treadmill Env
 
-    loop_simulate_treadmill(belt_diff, i) # Simulates belt_diff/interval instances of treadmill Env
+    gdf = loop_simulate_treadmill(belt_diff, i) # Simulates belt_diff/interval instances of treadmill Env
+
+    create_graph(gdf)
+    
 
     
     

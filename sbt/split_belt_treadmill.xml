@@ -18,33 +18,35 @@
     </default>
 
     <worldbody>
-        <camera name="axlecam" pos="-15 0 4" xyaxes="0 -1 0  0 0 1" mode="fixed"/> 
+        <camera name="axle_cam" pos="-15 0 4" xyaxes="0 -1 0  0 0 1" mode="fixed"/> 
         <light pos="0 0 40" dir="0 0 -1"/>
         <body pos="1.01 0 0.5" axisangle="1 0 0 0">
-            <geom name="redbelt" type="box" size="1 20 0.3" rgba="1 0 0 1"  material="grid" mass="50"/>
-            <joint name="redconveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
-            <site name="redbeltsite" type="sphere" size="0.05" pos="0 0 0"/>
-            <site name="forceSiteR" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 0 0 1" material="grid"/>
+            <geom name="slow_belt" type="box" size="1 20 0.3" rgba="1 0 0 1"  material="grid" mass="50"/>
+            <joint name="slow_belt_conveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
+
+            <site name="slow_belt_pos_site" type="sphere" size="0.05" pos="0 0 0"/>
+            <site name="slow_belt_force_site" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 0 0 1" material="grid"/>
         </body>
         <body pos="-1.01 0 0.54" axisangle="1 0 0 0">
-            <geom name="bluebelt" type="box" size="1 20 0.3" rgba="0 0 1 1" material="grid" mass="50"/>
-            <joint name="blueconveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
-            <site name="bluebeltsite" type="sphere" size="0.05" pos="0 0 0"/>
-            <site name="forceSiteB" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="0 0 1 1" material="grid"/>
+            <geom name="fast_belt" type="box" size="1 20 0.3" rgba="0 0 1 1" material="grid" mass="50"/>
+            <joint name="fast_belt_conveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
+
+            <site name="fast_belt_pos_site" type="sphere" size="0.05" pos="0 0 0"/>
+            <site name="fast_belt_force_site" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="0 0 1 1" material="grid"/>
         </body>
                  
     </worldbody>
 
 
     <actuator>  
-        <general name="redbeltact" joint="redconveyor" biastype="affine" gainprm="1" biasprm="0"/>
-        <general name="bluebeltact" joint="blueconveyor" biastype="affine" gainprm="1" biasprm="0"/> 
+        <general name="slow_belt_actuator" joint="slow_belt_conveyor" biastype="affine" gainprm="1" biasprm="0"/>
+        <general name="fast_belt_actuator" joint="fast_belt_conveyor" biastype="affine" gainprm="1" biasprm="0"/> 
     </actuator>
 
 
     <sensor>
-        <force site="forceSiteR"/>
-        <force site="forceSiteB"/>
+        <force site="slow_belt_force_site"/>
+        <force site="fast_belt_force_site"/>
     </sensor>
 
 
