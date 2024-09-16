@@ -1,16 +1,12 @@
 <mujoco model="split_belt_treadmill">
 
-
     <include file="./common/skybox.xml"/>
     <include file="./common/visual.xml"/>
     <include file="./common/materials.xml"/>
 
-    
     <compiler autolimits="true"/>
 
-
     <option gravity = "0 0 -9.81" timestep="0.01" />
-
 
     <default>
         <joint armature="1" damping="0" limited="false"/>
@@ -37,17 +33,14 @@
                  
     </worldbody>
 
-
     <actuator>  
         <general name="slow_belt_actuator" joint="slow_belt_conveyor" biastype="affine" gainprm="1" biasprm="0"/>
         <general name="fast_belt_actuator" joint="fast_belt_conveyor" biastype="affine" gainprm="1" biasprm="0"/> 
     </actuator>
 
-
     <sensor>
-        <force site="slow_belt_force_site"/>
-        <force site="fast_belt_force_site"/>
+        <force name="slow_belt_force_sensor" site="slow_belt_force_site"/>
+        <force name="fast_belt_force_sensor" site="fast_belt_force_site"/>
     </sensor>
-
 
 </mujoco>

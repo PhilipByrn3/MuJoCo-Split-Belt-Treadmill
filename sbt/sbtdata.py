@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 
-def ConstructData(timedata, fprdat, fpbdat, measured_velocity):
+def construct_data(timedata, fprdat, fpbdat, measured_velocity):
 
     datapd = {
 
@@ -27,7 +27,7 @@ def ConstructData(timedata, fprdat, fpbdat, measured_velocity):
 
 
 
-def findTime(df, fpdat, fpdat_shift, print_data):
+def find_time(df, fpdat, fpdat_shift, print_data):
 
     time_df = df['Time']
     idx = 1
@@ -108,7 +108,7 @@ def findTime(df, fpdat, fpdat_shift, print_data):
     return tavg
 
 
-def AverageSteadyVelocity(slow_time, fast_time, alpha, beta, length, belt_diff, measured_velocity):
+def average_steady_velocity(slow_time, fast_time, alpha, beta, length, belt_diff, measured_velocity):
 
     measured_velocity_avg = measured_velocity.mean()
 
