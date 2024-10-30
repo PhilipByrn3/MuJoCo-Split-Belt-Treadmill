@@ -181,7 +181,3 @@ if __name__ == '__main__':
     # gdf = loop_simulate_treadmill(belt_diff, i) # Simulates belt_diff/interval instances of treadmill Env
 
     # create_graph(gdf)
-    
-
-    
-    
