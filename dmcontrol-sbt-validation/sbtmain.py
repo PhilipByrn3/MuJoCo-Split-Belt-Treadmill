@@ -128,7 +128,7 @@ def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_vide
     return single_slow_belt_force_list, single_fast_belt_force_list
 
     
-def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, belt_difference_increment, single_slow_belt_force_list, single_fast_belt_force_list):
+def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, belt_difference_increment, single_slow_belt_force_list, single_fast_belt_force_list,       sbt_belt_speed_baseline_difference):
     i = base_belt_diff
     loop_start_time = time.time()
     total_slow_belt_force, total_fast_belt_force = [], []
@@ -136,7 +136,8 @@ def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, bel
     while i <= belt_speed_difference_range:
         render_video_overwrite = False
         sim_start_time = time.time()
-        single_slow_belt_force_sim, single_fast_belt_force_sim = sbt_simulate_treadmill(float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference')),
+        single_slow_belt_force_sim, single_fast_belt_force_sim = sbt_simulate_treadmill(
+                               float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference')),
                                float(config.get('SimulationConfig', 'sbt_belt_speed_set_difference')),
                                int(config.get('SimulationConfig', 'number_of_timesteps_per_simulation')),
                                render_video_overwrite,
@@ -155,13 +156,17 @@ def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, bel
 
     loop_end_time = time.time()
 
-
     print('Loop Simulation complete!',
           '\nTotal time elapsed: ', loop_end_time-loop_start_time,
-          '\nTotal amount of simulations: ', int(belt_speed_difference_range/belt_difference_increment),
+          '\nTotal amount of simulations: ', float((belt_speed_difference_range-sbt_belt_speed_baseline_difference)/belt_difference_increment),
           '\nBelt speed difference range: ', belt_speed_difference_range,
           '\nBelt speed difference increment: ', belt_difference_increment
           )
+    
+    slow_array = np.array(total_slow_belt_force)
+    fast_array = np.array(total_fast_belt_force)
+
+    print(slow_array)
 
     return total_slow_belt_force, total_fast_belt_force
     
@@ -190,7 +195,8 @@ def sbt_run_simulation():
                                     float(config.get('LoopSettings', 'sbt_loop_belt_speed_difference_range')),
                                     float(config.get('LoopSettings', 'sbt_loop_belt_speed_difference_increment')),
                                     single_slow_belt_force_list,
-                                    single_fast_belt_force_list
+                                    single_fast_belt_force_list,
+                                    float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference'))
                                     )       
     else:
         raise Exception('sbt_run_single_sim and sbt_run_loop_sim must be different boolean values in config.ini')
