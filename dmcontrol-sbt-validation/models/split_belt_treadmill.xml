@@ -1,0 +1,46 @@
+<mujoco model="split_belt_treadmill">
+
+    <include file="./common/skybox.xml"/>
+    <include file="./common/visual.xml"/>
+    <include file="./common/materials.xml"/>
+
+    <compiler autolimits="true"/>
+
+    <option gravity = "0 0 -9.81" timestep="0.01" />
+
+    <default>
+        <joint armature="1" damping="0" limited="false"/>
+        <geom density="20" friction="2 0 0"/>
+    </default>
+
+    <worldbody>
+        <camera name="axle_cam" pos="-15 0 4" xyaxes="0 -1 0  0 0 1" mode="fixed"/> 
+        <light pos="0 0 40" dir="0 0 -1"/>
+        <body pos="1.01 0 0.5" axisangle="1 0 0 0">
+            <geom name="slow_belt" type="box" size="1 20 0.3" rgba="1 0 0 1"  material="grid" mass="50"/>
+            <joint name="slow_belt_conveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
+
+            <site name="slow_belt_pos_site" type="sphere" size="0.05" pos="0 0 0"/>
+            <site name="slow_belt_force_site" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="1 0 0 1" material="grid"/>
+        </body>
+        <body pos="-1.01 0 0.54" axisangle="1 0 0 0">
+            <geom name="fast_belt" type="box" size="1 20 0.3" rgba="0 0 1 1" material="grid" mass="50"/>
+            <joint name="fast_belt_conveyor" type="slide" pos="0 -10 0" axis="0 1 0" range="-20 20"/>
+
+            <site name="fast_belt_pos_site" type="sphere" size="0.05" pos="0 0 0"/>
+            <site name="fast_belt_force_site" type="box" pos="0 0 0.31" size="1 20 0.01" rgba="0 0 1 1" material="grid"/>
+        </body>
+                 
+    </worldbody>
+
+    <actuator>  
+        <general name="slow_belt_actuator" joint="slow_belt_conveyor" biastype="affine" gainprm="1" biasprm="0"/>
+        <general name="fast_belt_actuator" joint="fast_belt_conveyor" biastype="affine" gainprm="1" biasprm="0"/> 
+    </actuator>
+
+    <sensor>
+        <force name="slow_belt_force_sensor" site="slow_belt_force_site"/>
+        <force name="fast_belt_force_sensor" site="fast_belt_force_site"/>
+    </sensor>
+
+</mujoco>
