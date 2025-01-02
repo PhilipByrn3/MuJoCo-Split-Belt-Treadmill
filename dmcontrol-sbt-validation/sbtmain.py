@@ -100,7 +100,7 @@ def sbt_initialize_dmcontrol():
                           task=sbt_task)
     return [sbt_world, sbt_physics, sbt_task, sbt_env]
 
-def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_video, sbt_physics, single_slow_belt_force_list ,single_fast_belt_force_list):
+def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_video, sbt_physics, single_slow_belt_force_sim ,single_fast_belt_force_sim, time_data):
     i = 0
 
     frames = []
@@ -113,8 +113,9 @@ def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_vide
         sbt_physics.named.data.qpos['fast_belt_conveyor'] = 0 
         sbt_physics.named.data.qpos['slow_belt_conveyor'] = 0 
 
-        single_slow_belt_force_list.append(sbt_physics.named.data.sensordata['slow_belt_force_sensor'][2].copy())
-        single_fast_belt_force_list.append(sbt_physics.named.data.sensordata['fast_belt_force_sensor'][2].copy())
+        single_slow_belt_force_sim.append(float(sbt_physics.named.data.sensordata['slow_belt_force_sensor'][2].copy()))
+        single_fast_belt_force_sim.append(float(sbt_physics.named.data.sensordata['fast_belt_force_sensor'][2].copy()))
+        time_data.append(sbt_physics.data.time)
 
         if render_video is True:
             img = sbt_physics.render(width=640, height=480, camera_id='axle_cam')
@@ -125,13 +126,44 @@ def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_vide
     if render_video is True:   
         sbt_render_video(frames)
 
-    return single_slow_belt_force_list, single_fast_belt_force_list
+    # print(single_slow_belt_force_sim)
+    for z in range(len(single_slow_belt_force_sim)):
+        if single_slow_belt_force_sim[z] == 490.5:
+            single_slow_belt_force_sim[z] = 0
+        else:
+            single_slow_belt_force_sim[z] = 1
+
+    print(single_slow_belt_force_sim)
+
+    for k in range(len(single_fast_belt_force_sim)):
+
+        if single_slow_belt_force_sim[k] == 1: #find start time
+            print(k, single_slow_belt_force_sim[k])
+
+            if sum(single_slow_belt_force_sim[k:k+16]) != 0 and sum(single_slow_belt_force_sim[k-16:k]) == 0:
+                start_time = time_data[k]
+                print('stime=',start_time)
+
+        elif single_slow_belt_force_sim[k] == 1:
+            print(k, single_slow_belt_force_sim[k])
+
+            if sum(single_slow_belt_force_sim[k:k+16]) == 0: 
+                end_time = time_data[k]
+                print('etime=', end_time) #<----- NOT WORKING
+        
+        else:
+            print(k, single_slow_belt_force_sim[k])
+
+
+
+
+    # return single_slow_belt_force_sim, single_fast_belt_force_sim
 
     
 def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, belt_difference_increment, single_slow_belt_force_list, single_fast_belt_force_list,       sbt_belt_speed_baseline_difference):
     i = base_belt_diff
     loop_start_time = time.time()
-    total_slow_belt_force, total_fast_belt_force = [], []
+    total_slow_belt_force, total_fast_belt_force, time_data = [], []
 
     while i <= belt_speed_difference_range:
         render_video_overwrite = False
@@ -143,11 +175,13 @@ def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, bel
                                render_video_overwrite,
                                sbt_physics,
                                single_slow_belt_force_list,
-                               single_fast_belt_force_list                          
+                               single_fast_belt_force_list,
+                               time_data                          
                                )
         
         total_slow_belt_force.append(single_slow_belt_force_sim)
         total_fast_belt_force.append(single_fast_belt_force_sim)
+
 
         sim_end_time = time.time()
 
@@ -163,10 +197,6 @@ def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, bel
           '\nBelt speed difference increment: ', belt_difference_increment
           )
     
-    slow_array = np.array(total_slow_belt_force)
-    fast_array = np.array(total_fast_belt_force)
-
-    print(slow_array)
 
     return total_slow_belt_force, total_fast_belt_force
     
@@ -179,6 +209,7 @@ def sbt_run_simulation():
 
     single_slow_belt_force_list = []
     single_fast_belt_force_list = []
+    time_data = []
 
     if sbt_run_single_sim == True and sbt_run_loop_sim == False:
         sbt_simulate_treadmill(float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference')),
@@ -187,19 +218,23 @@ def sbt_run_simulation():
                                str_to_bool(config.get('SimulationConfig', 'render_video_iff_no_loop')),
                                sbt_physics,
                                single_slow_belt_force_list,
-                               single_fast_belt_force_list
+                               single_fast_belt_force_list,
+                               time_data
                                )      
         
     elif sbt_run_loop_sim == True and sbt_run_single_sim == False:
-        sbt_loop_simulate_treadmill(float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference')),
+        total_slow_belt_force, total_fast_belt_force = sbt_loop_simulate_treadmill(float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference')),
                                     float(config.get('LoopSettings', 'sbt_loop_belt_speed_difference_range')),
                                     float(config.get('LoopSettings', 'sbt_loop_belt_speed_difference_increment')),
                                     single_slow_belt_force_list,
                                     single_fast_belt_force_list,
                                     float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference'))
-                                    )       
+                                    )
+       
     else:
         raise Exception('sbt_run_single_sim and sbt_run_loop_sim must be different boolean values in config.ini')
+    
+    # return total_slow_belt_force, total_fast_belt_force
 
 if __name__ == '__main__':
 
@@ -207,4 +242,7 @@ if __name__ == '__main__':
     sbt_world, sbt_physics, sbt_task, sbt_env = sbt_initialize_dmcontrol()
     sbt_task.initialize_episode(sbt_physics)
 
+    # total_slow_belt_force, total_fast_belt_force = sbt_run_simulation()
     sbt_run_simulation()
+
+   

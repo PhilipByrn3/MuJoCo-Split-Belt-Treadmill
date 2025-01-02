@@ -10,7 +10,7 @@
 
     <default>
         <joint armature="1" damping="0" limited="false"/>
-        <geom density="20" friction="2 0 0"/>
+        <geom density="25" friction="2 0 0"/>
     </default>
 
     <worldbody>

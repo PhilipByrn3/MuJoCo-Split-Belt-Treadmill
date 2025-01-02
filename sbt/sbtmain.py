@@ -83,7 +83,7 @@ def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data
     
     slow_belt_force_raw, fast_belt_force_raw, measured_velocity_data, time_data, frames = [], [], [], [], []
 
-    while i < 10000:
+    while i < 2000:
 
         sb_physics.step()
 
@@ -134,9 +134,9 @@ def simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data
 
 def loop_simulate_treadmill(belt_diff, i):
 
-    while belt_diff <= 4.55:
+    while belt_diff <= 1.6:
 
-        measured_velocity_avg, simulated_velocity_avg = simulate_treadmill(belt_diff, i, sb_physics, render_video_enable, print_data)
+        measured_velocity_avg, simulated_velocity_avg = simulate_treadmill(belt_diff, i, sb_physics, render_video_enable=False, print_data=False)
 
         #MVAlist.append(measured_velocity_avg)
         SVAlist.append(simulated_velocity_avg)
@@ -154,6 +154,7 @@ def loop_simulate_treadmill(belt_diff, i):
     }
     
     gdf = pd.DataFrame(graphpd)
+    gdf.to_csv("Bdiffs.csv")
     return gdf
 
 
@@ -176,8 +177,8 @@ if __name__ == '__main__':
 
     MVAlist, SVAlist, BDlist = [], [], []
 
-    simulate_treadmill(belt_diff=0.55, i=0, sb_physics, render_video_enable=False, print_data=False) # Simulates one instance of the treadmill Env
+    #simulate_treadmill(belt_diff=0.55, i=0, sb_physics, render_video_enable=False, print_data=False) # Simulates one instance of the treadmill Env
 
-    # gdf = loop_simulate_treadmill(belt_diff, i) # Simulates belt_diff/interval instances of treadmill Env
+    gdf = loop_simulate_treadmill(belt_diff=0.1, i=0) # Simulates belt_diff/interval instances of treadmill Env
 
-    # create_graph(gdf)
+    #create_graph(gdf)
