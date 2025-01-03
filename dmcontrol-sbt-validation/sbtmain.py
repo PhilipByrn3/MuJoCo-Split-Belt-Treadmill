@@ -100,6 +100,67 @@ def sbt_initialize_dmcontrol():
                           task=sbt_task)
     return [sbt_world, sbt_physics, sbt_task, sbt_env]
 
+def sbt_find_average_belt_time(single_belt_force_sim, time_data):
+    #Finds the average steady velocity of the Rimless Wheel in refrence to the slow belt for each simulation
+    start_time_list, end_time_list, time_pairs = [], [], []
+
+    for z in range(len(single_belt_force_sim)):
+        if single_belt_force_sim[z] == 490.5:
+            single_belt_force_sim[z] = 0
+        else:
+            single_belt_force_sim[z] = 1
+
+    #print(single_belt_force_sim)
+
+    for k in range(len(single_belt_force_sim)):
+
+        if single_belt_force_sim[k] == 1: 
+            #print(k, single_belt_force_sim[k], '*****')
+            pass
+
+        elif single_belt_force_sim[k] == 0:
+            #print(k, single_belt_force_sim[k])
+
+            if sum(single_belt_force_sim[k:k+16]) != 0 and sum(single_belt_force_sim[k-16:k]) == 0 and single_belt_force_sim[k+1]==1:
+                start_time_list.append(time_data[k+1])
+                start_time = time_data[k+1]
+                #print('stime=',start_time, k+1)
+
+            if sum(single_belt_force_sim[k:k+16]) == 0 and sum(single_belt_force_sim[k-16:k]) != 0 and single_belt_force_sim[k-1]==1:
+                end_time_list.append(time_data[k-1])
+                end_time = time_data[k-1]
+                #print('etime=', end_time, k-1)
+
+    #print(start_time_list, end_time_list)
+
+
+    if start_time_list[0] > end_time_list[0]:
+        end_time_list.remove(end_time_list[0])
+        
+    
+    for y in range(len(end_time_list)):
+        time_pairs.append((start_time_list[y], end_time_list[y]))
+    
+    #print(time_pairs)
+    time_difference = sum(end-start for start, end in time_pairs)
+    time_average = time_difference/len(time_pairs)
+
+    return time_average
+
+def sbt_average_wheel_velocity(sbt_slow_belt_time, sbt_fast_belt_time, belt_diff):
+    alpha = np.deg2rad(4.5)
+    beta = np.deg2rad(15.5)
+    length = 2.54 
+
+    sinsum = np.sin(alpha) + np.sin(beta)
+
+    timesum = sbt_slow_belt_time + sbt_fast_belt_time
+    sbt_rimless_walk_speed = ((2 * length * sinsum) - (sbt_fast_belt_time * belt_diff)) / timesum
+
+    # print(timesum, 2 * length * sinsum, sbt_fast_belt_time * belt_diff)
+
+    return sbt_rimless_walk_speed 
+
 def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_video, sbt_physics, single_slow_belt_force_sim ,single_fast_belt_force_sim, time_data):
     i = 0
 
@@ -126,49 +187,22 @@ def sbt_simulate_treadmill(base_belt_diff, set_belt_diff, timesteps, render_vide
     if render_video is True:   
         sbt_render_video(frames)
 
-    # print(single_slow_belt_force_sim)
-    for z in range(len(single_slow_belt_force_sim)):
-        if single_slow_belt_force_sim[z] == 490.5:
-            single_slow_belt_force_sim[z] = 0
-        else:
-            single_slow_belt_force_sim[z] = 1
+    sbt_slow_belt_time = sbt_find_average_belt_time(single_slow_belt_force_sim, time_data)
+    sbt_fast_belt_time = sbt_find_average_belt_time(single_fast_belt_force_sim, time_data)
+   
+    sbt_rimless_walk_speed = sbt_average_wheel_velocity(sbt_slow_belt_time, sbt_fast_belt_time, set_belt_diff)
 
-    print(single_slow_belt_force_sim)
-
-    for k in range(len(single_fast_belt_force_sim)):
-
-        if single_slow_belt_force_sim[k] == 1: #find start time
-            print(k, single_slow_belt_force_sim[k])
-
-            if sum(single_slow_belt_force_sim[k:k+16]) != 0 and sum(single_slow_belt_force_sim[k-16:k]) == 0:
-                start_time = time_data[k]
-                print('stime=',start_time)
-
-        elif single_slow_belt_force_sim[k] == 1:
-            print(k, single_slow_belt_force_sim[k])
-
-            if sum(single_slow_belt_force_sim[k:k+16]) == 0: 
-                end_time = time_data[k]
-                print('etime=', end_time) #<----- NOT WORKING
-        
-        else:
-            print(k, single_slow_belt_force_sim[k])
-
-
-
-
-    # return single_slow_belt_force_sim, single_fast_belt_force_sim
-
+    return sbt_rimless_walk_speed
     
 def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, belt_difference_increment, single_slow_belt_force_list, single_fast_belt_force_list,       sbt_belt_speed_baseline_difference):
     i = base_belt_diff
     loop_start_time = time.time()
-    total_slow_belt_force, total_fast_belt_force, time_data = [], []
+    total_slow_belt_force, total_fast_belt_force, time_data = [], [], []
 
     while i <= belt_speed_difference_range:
         render_video_overwrite = False
         sim_start_time = time.time()
-        single_slow_belt_force_sim, single_fast_belt_force_sim = sbt_simulate_treadmill(
+        sbt_rimless_walk_speed = sbt_simulate_treadmill(
                                float(config.get('SimulationConfig', 'sbt_belt_speed_baseline_difference')),
                                float(config.get('SimulationConfig', 'sbt_belt_speed_set_difference')),
                                int(config.get('SimulationConfig', 'number_of_timesteps_per_simulation')),
@@ -178,14 +212,13 @@ def sbt_loop_simulate_treadmill(base_belt_diff, belt_speed_difference_range, bel
                                single_fast_belt_force_list,
                                time_data                          
                                )
-        
-        total_slow_belt_force.append(single_slow_belt_force_sim)
-        total_fast_belt_force.append(single_fast_belt_force_sim)
-
 
         sim_end_time = time.time()
 
-        print('Simulation complete with difference of: ', round(i,4),  '\nTime Elapsed: ', sim_end_time-sim_start_time,'\n----------')
+        print('Simulation complete with difference of: ', round(i,4),  
+              '\nTime Elapsed: ', sim_end_time-sim_start_time,
+              '\nAverage Walk Speed: ', sbt_rimless_walk_speed,
+              '\n----------')
         i += belt_difference_increment
 
     loop_end_time = time.time()
